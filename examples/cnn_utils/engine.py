@@ -123,3 +123,4 @@ def test(epoch,
     if args.log_writer is not None:
         args.log_writer.add_scalar('val/loss', val_loss.avg, epoch)
         args.log_writer.add_scalar('val/accuracy', val_accuracy.avg, epoch)
+    return val_accuracy.avg
