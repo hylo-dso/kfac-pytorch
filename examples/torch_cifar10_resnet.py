@@ -98,6 +98,7 @@ def parse_args():
     
     parser.add_argument('--backend', type=str, default='nccl',
                         help='backend for distribute training (default: nccl)')
+    parser.add_argument('--url', type=str, default='env://')
     # Set automatically by torch distributed launch
     parser.add_argument('--local_rank', type=int, default=0,
                         help='local rank for distributed training')
@@ -110,7 +111,8 @@ def parse_args():
 def main():
     args = parse_args()
 
-    torch.distributed.init_process_group(backend=args.backend, init_method='env://')
+    torch.distributed.init_process_group(backend=args.backend, init_method=args.url,
+            world_size=int(os.environ['WORLD_SIZE']), rank=int(os.environ['RANK']))
     kfac.comm.init_comm_backend() 
 
     if args.cuda:
