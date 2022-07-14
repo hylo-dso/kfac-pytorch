@@ -193,12 +193,28 @@ if __name__ == '__main__':
                 preconditioner is not None):
             preconditioner.load_state_dict(checkpoint['preconditioner'])
 
+    
+    acc = []
+    timing = []
+
     start = time.time()
 
     for epoch in range(args.resume_from_epoch + 1, args.epochs + 1):
+        start = torch.cuda.Event(enable_timing=True)
+        end = torch.cuda.Event(enable_timing=True)
+
+        start.record()
+
         engine.train(epoch, model, optimizer, preconditioner, loss_func, 
                      train_sampler, train_loader, args)
-        engine.test(epoch, model, loss_func, val_loader, args)
+        
+        end.record()
+        torch.cuda.synchronize()
+        timing.append(start.elapsed_time(end))
+
+        test_acc = engine.test(epoch, model, loss_func, val_loader, args)
+        acc.append(test_acc.item())
+
         for scheduler in lr_schedules:
             scheduler.step()
         if (epoch > 0 and epoch % args.checkpoint_freq == 0 and
@@ -210,4 +226,17 @@ if __name__ == '__main__':
 
     if args.verbose:
         print('\nTraining time: {}'.format(datetime.timedelta(seconds=time.time() - start)))
+
+    fname = args.model + '-' + args.dataset + '-base-lr' + str(args.base_lr)
+    fname += '-d' + str(args.damping) + '-wd' + str(args.weight_decay)
+    fname += '-finv' + str(args.kfac_update_freq) + '-fcov' + str(args.kfac_cov_update_freq)
+    fname += '.csv'
+    f = open(fname, "w")
+    f.write('acc, time(ms), total_time(ms)\n')
+    total_time = 0
+    for i in range(args.resume_from_epoch, args.epochs):
+        total_time += timing[i]
+        line = str(acc[i]) + ', ' + str(timing[i]) + ', ' + str(total_time) + '\n'
+        f.write(line)
+    f.close()
 
