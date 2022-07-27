@@ -1,6 +1,6 @@
 # PyTorch Distributed K-FAC Preconditioner
 
-[![DOI](https://zenodo.org/badge/240976400.svg)](https://zenodo.org/badge/latestdoi/240976400)
+[![DOI](https://zenodo.org/badge/513737577.svg)](https://zenodo.org/badge/latestdoi/513737577)
 
 Code for the papers "[Convolutional Neural Network Training with Distributed K-FAC](https://dl.acm.org/doi/10.5555/3433701.3433826)" and "[KAISA: An Adaptive Second-order Optimizer Framework for Deep Neural Networks](https://arxiv.org/abs/2107.01739)."
 
